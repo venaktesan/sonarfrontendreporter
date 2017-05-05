@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Language="en-US" Id="" Version="1.1.1" Publisher="iHorse Technologies"/>
+    <DisplayName>Sonar Frontend Reporter support for Visual Studio Code</DisplayName>
+    <Description xml:space="preserve">Sonar Frontend Reporter support for Visual Studio Code that provides on-the-fly feedback to developers on new bugs and quality issues injected into their code.(CSS,TYPESCRIPT,HTML,JAVASCRIPT,SASS,ANGULARJS)</Description>
+    <Tags></Tags>
+    <Categories>Linters</Categories>
+    <GalleryFlags>Public</GalleryFlags>
+    <Badges><Badge Link="" ImgUri="" Description="Dependency Status" /></Badges>
+    <Properties>
+      <Property Id="Microsoft.VisualStudio.Code.Engine" Value="^1.6.0" />
+      <Property Id="Microsoft.VisualStudio.Code.ExtensionDependencies" Value="" />
+      
+        <Property Id="Microsoft.VisualStudio.Services.Links.Source" Value="" />
+        <Property Id="Microsoft.VisualStudio.Services.Links.Getstarted" Value="" />
+        
+      
+      <Property Id="Microsoft.VisualStudio.Services.Links.Support" Value="" />
+      <Property Id="Microsoft.VisualStudio.Services.Links.Learn" Value="" />
+      
+      
+      <Property Id="Microsoft.VisualStudio.Services.GitHubFlavoredMarkdown" Value="false" />
+    </Properties>
+    
+    <Icon>extension/images/ihorse.png</Icon>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Code"/>
+  </Installation>
+  <Dependencies/>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.Code.Manifest" Path="extension/package.json" Addressable="true" />
+    <Asset Type="Microsoft.VisualStudio.Services.Content.Details" Path="" Addressable="true" /><Asset Type="Microsoft.VisualStudio.Services.Content.Changelog" Path="" Addressable="true" /><Asset Type="Microsoft.VisualStudio.Services.Icons.Default" Path="" Addressable="true" />
+  </Assets>
+</PackageManifest>

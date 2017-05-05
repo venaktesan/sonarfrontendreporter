@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+
+/* eslint no-console:off */
+
+var chalk = require('chalk'),
+  version = require('../package.json').version,
+  program = require('commander'),
+  CLIEngine;
+
+var CLI = {
+
+  /**
+   * Launch reporters
+   */
+  launchReporters: function () {
+    if (program.es5) {
+      CLIEngine = require('../build/cli');
+    } else {
+      CLIEngine = require('../lib/cli');
+    }
+
+    (new CLIEngine(program.config)).launchReporters();
+  }
+
+};
+
+program
+  .version(version)
+  .option('-c, --config <path>', 'Use configuration from this file. Defaults to ./.sreporterrc')
+  .option('--es5', 'launch CLI with ES5 backward compatibility')
+  .parse(process.argv);
+
+CLI.launchReporters();
