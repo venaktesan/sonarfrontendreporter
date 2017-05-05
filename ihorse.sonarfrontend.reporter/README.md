@@ -3,6 +3,13 @@
 Sonar Web Frontend Reporter support for Visual Studio Code that provides on-the-fly feedback to developers on new bugs and quality issues injected into their code.(CSS,TYPESCRIPT,HTML,JAVASCRIPT,SASS,ANGULARJS).Not publish Officially in Vscode Extension.
 
 ## Important
+1. https://github.com/venaktesan/sonarfrontendreporter  Source download from this git url.
+
+2. After paste the download plugin inside this location ->C:\Users\xxx\.vscode\extensions\
+
+3. Open cmd prompt go to this location ->C:\Users\xxx\.vscode\extensions\ihorse.sonarfrontend.reporter.
+
+4. Run this commands one by one npm install and npm install sonar-web-frontend-reporters -g .
 
 
 ## Extension settings
