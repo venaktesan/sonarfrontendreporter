@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // The module "vscode" contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const fs = require("async-file");
+const filefs = require('fs');
 const extract = require("extract-zip");
 const os = require("os");
 const path = require("path");
@@ -19,22 +20,33 @@ const vscode = require("vscode");
 const lintProvider_1 = require("./features/lintProvider");
 const globalTemplate_1 = require("./templates/globalTemplate");
 const sonarlintTemplate_1 = require("./templates/sonarlintTemplate");
+const configJsonTemplate = require("./templates/configJsonTemplate");
 const pathToExtract = path.join(__filename, "./../../../tools");
 const pathToDownload = path.join(pathToExtract, "sonarlint-cli.zip");
+let rootPath=vscode.workspace.rootPath;
+const configJsonPath = path.join(rootPath, "configJsonTemplate.json");
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
     return __awaiter(this, void 0, void 0, function* () {
-        const sonarLintExists = yield fs.exists(pathToDownload);
-        if (!sonarLintExists) {
-            //vscode.window.showInformationMessage("SonarLint utility wasn't found. Installation is started.");
-           // install(context);
-            //return;
+        const configJsonFileExists = yield fs.exists(configJsonPath);
+
+        if (!configJsonFileExists) {
+            vscode.window.showInformationMessage("Config File Not Exists.");
+            createFile(context);
+            return;
         }
+        checkConfiglintJson();
         addSubscriptions(context);
     });
 }
 exports.activate = activate;
+
+function createFile(context){
+createConfigFile(rootPath,"configJsonTemplate.json" , new configJsonTemplate.default());
+addSubscriptions(context);
+}
+
 function install(context) {
     const sonarlintCLILocation = "https://github.com/nixel2007/sonarlint-cli/releases/download/console-report-1.1/sonarlint-cli.zip";
     const options = {
@@ -69,6 +81,7 @@ function install(context) {
     });
 }
 function addSubscriptions(context) {
+
     const linter = new lintProvider_1.default();
     linter.activate(context.subscriptions);
 
@@ -134,6 +147,7 @@ function addSubscriptions(context) {
     context.subscriptions.push(vscode.commands.registerCommand("sonarqube-inject.clear-all-rule-errors", () => {
         linter.clearAllRuleErrorList();
     }));      
+
 }
 function createGlobalJson() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -165,19 +179,37 @@ function createSonarlintJson() {
         createConfigFile(rootPath, filename, new sonarlintTemplate_1.default());
     });
 }
+
+function checkConfiglintJson() {
+    return __awaiter(this, void 0, void 0, function* () {
+
+    let filename="configJsonTemplate.json";
+    const filePath = path.join(rootPath, filename);
+    const configJsonData = JSON.parse(filefs.readFileSync(configJsonPath, 'utf8'));
+    console.log("configJsonData.projectkey" +configJsonData.projectkey);
+    if(configJsonData.projectkey.length === 0){
+        vscode.window.showInformationMessage("Must Give the ProjectId in "+ filename);
+        createConfigFile(rootPath, filename, new configJsonTemplate.default());
+        return ;
+    }
+    });
+}
 function createConfigFile(rootPath, filename, template) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!rootPath) {
             return;
         }
+        
         const filePath = path.join(rootPath, filename);
         const action = "Open " + filename;
+
         let selectedAction;
         try {
             yield fs.stat(filePath);
             selectedAction = yield vscode.window.showInformationMessage(filename + " already exists", action);
         }
         catch (error) {
+             
             try {
                 yield fs.writeFile(filePath, JSON.stringify(template.getTemplateObject(), undefined, 4));
                 selectedAction = yield vscode.window.showInformationMessage(filename + " was created", action);

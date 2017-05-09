@@ -225,7 +225,7 @@
 	"id-match": ["error", "^[a-z]+([A-Z][a-z]+)*$"],
 	"jsx-quotes": ["error", "prefer-single"],
 	"line-comment-position": ["error", { "position": "beside" }],
-    "linebreak-style": ["error", "windows"],
+    "linebreak-style": ["error", "unix"],
     "lines-around-directive": ["error", "always"],
 	"max-depth": ["error", 4],
     "max-len": ["error", 80],

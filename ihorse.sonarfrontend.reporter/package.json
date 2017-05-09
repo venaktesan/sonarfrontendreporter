@@ -138,6 +138,19 @@
         "category": "SonarQube Inject"
       }
     ],
+	"keybindings": [{
+        "command": "sonarqube-inject.generate-single-file-report",
+        "key": "ctrl+f1",
+        "mac": "cmd+f1",
+        "when": "editorTextFocus"
+    },
+	{
+        "command": "sonarqube-inject.clear-all-rule-errors",
+        "key": "ctrl+f2",
+        "mac": "cmd+f2",
+        "when": ""
+    }
+	],
     "menus": {
       "explorer/context": [
         {
@@ -246,7 +259,7 @@
           "description": "Only exclude files Path only.This exclude path are apply for sonarlint report generate not for sonarqube",
           "type": "string",
           "default": [
-            "c:\\Users\\venkatesang\\Desktop\\app\\assert\\vendor\\**","c:\\Users\\venkatesang\\Desktop\\app\\assert\\vendor\\**"
+           
           ]
         }
       }

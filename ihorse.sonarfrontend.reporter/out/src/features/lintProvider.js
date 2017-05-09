@@ -7,21 +7,36 @@ const vscode = require("vscode");
 const spawn = require("cross-spawn");
 const fs = require('fs');
 const request = require('request');
-
+let configJsonFilename="configJsonTemplate.json";
 let rootPath=vscode.workspace.rootPath;
-const rootReportPath= rootPath.substring(0, rootPath.lastIndexOf("\\"))
-const pathToSreporterFileExist = path.join(__filename, "./../../../../bin/sreporter");
-const pathTo_Sreporter_FileExist = path.join(__filename, "./../../../../.sreporterrc");
-const pathTo_RulesOverWritePath = path.join(__filename, "./../../../../rules");
+const jsonFilePath = path.join(rootPath, configJsonFilename);
+const node_ssh = require('node-ssh');
 
-const cssPath=[rootPath+"\\**\\*.css","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**"];
-const eslintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**"];
-const eslintAngularPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**"];
-const jshintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**"];
-const htmlHintPath=[rootPath+"\\**\\*.html","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**"];
-const tslintPath=[rootPath+"\\**\\*.ts","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**"];
-const sassPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**"];
-const sassToScsslintPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**"];
+let validRuleCssFile=true;
+let validRuleAngularFile=true;
+let validRuleJsFile=true;
+let validRuleHtmlFile=true;
+let validRuleSassFile=true;
+let validRuleTsFile=true;
+let validRuleEsFile=true;
+let validRuleFolderName="";
+let validRuleFolderFlag=false;
+let returnValue ="";
+
+
+const rootReportPath= rootPath;
+const pathToSreporterFileExist = path.join(__filename, "./../../../../bin/sreporter");
+const pathTo_Sreporter_FileExist = path.join(rootPath+"/.sreporterrc");
+
+
+const cssPath=[rootPath+"\\**\\*.css","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const eslintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const eslintAngularPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const jshintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const htmlHintPath=[rootPath+"\\**\\*.html","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const tslintPath=[rootPath+"\\**\\*.ts","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const sassPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const sassToScsslintPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
 
 let lintExcludePaths = [];
 let info_Count=0;
@@ -57,16 +72,23 @@ const cssLintReport = require(__filename,'./../../../../../reports/sonar/csslint
 const htmlHintLintReport = require(__filename,'./../../../../../reports/sonar/htmlhint.json');
 const sassLintReport = require(__filename,'./../../../../../reports/sonar/sasslint.json');
 const tsLintReport = require(__filename,'./../../../../../reports/sonar/tslint.json');
+const pathTo_RulesOverWritePath = path.join(rootPath,"rules");
+
 
 class LintProvider {
 
 updateSonarLintRules(){
+  returnValue=checkJsonProjectKey(jsonFilePath,configJsonFilename);
+  if(returnValue){
   let sshConnectFlag=0;
-  const node_ssh = require('node-ssh');
+  
   const ssh = new node_ssh();
   processBar_Info.text = ` $(sync) Processing...`; 
   processBar_Info.show();
-    try{
+  
+  this.checkFolderExistOrNot(pathTo_RulesOverWritePath);
+
+  try{
     ssh.connect({
     host: '192.168.1.55',
     username: 'johnsonp',
@@ -74,60 +96,84 @@ updateSonarLintRules(){
     }).then(function() {
     sshConnectFlag=1;
     // Local, Remote 
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.csslintrc', '/opt/sonar-web-frontend-reporters-master/rules/.csslintrc').then(function(Contents) {
+    validRuleFolderFlag=true;
+    ssh.getFile(pathTo_RulesOverWritePath+'\\.csslintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.csslintrc').then(function(Contents) {
         console.log("The .csslintrc File's contents were successfully downloaded");
+        validRuleCssFile=true;
     }, function(error) {
+        validRuleCssFile=false;
         console.log("Something's wrong in .csslintrc")
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.csslintrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.eslintangularrc', '/opt/sonar-web-frontend-reporters-master/rules/.eslintangularrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'\\.eslintangularrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.eslintangularrc').then(function(Contents) {
         console.log("The .eslintangularrc File's contents were successfully downloaded");
+        validRuleAngularFile=true;
     }, function(error) {
+       validRuleAngularFile=false;
         console.log("Something's wrong in .eslintangularrc")
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.eslintangularrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.eslintrc', '/opt/sonar-web-frontend-reporters-master/rules/.eslintrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'\\.eslintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.eslintrc').then(function(Contents) {
+        validRuleEsFile=true;
         console.log("The .eslintrc File's contents were successfully downloaded");
     }, function(error) {
+        validRuleEsFile=false;
         console.log("Something's wrong in .eslintrc")
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.eslintrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.htmlhintrc', '/opt/sonar-web-frontend-reporters-master/rules/.htmlhintrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'\\.htmlhintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.htmlhintrc').then(function(Contents) {
+        validRuleHtmlFile=true;
         console.log("The .htmlhintrc File's contents were successfully downloaded");
     }, function(error) {
+        validRuleHtmlFile=false;
         console.log("Something's wrong in .htmlhintrc")
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.htmlhintrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.jshintrc', '/opt/sonar-web-frontend-reporters-master/rules/.jshintrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'\\.jshintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.jshintrc').then(function(Contents) {
         console.log("The .jshintrc File's contents were successfully downloaded");
+        validRuleJsFile=true;
     }, function(error) {
+        validRuleJsFile=false;
         console.log("Something's wrong in .jshintrc")
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.jshintrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.sass-lint.yml', '/opt/sonar-web-frontend-reporters-master/rules/.sass-lint.yml').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'\\.sass-lint.yml', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.sass-lint.yml').then(function(Contents) {
         console.log("The .sass-lint.yml File's contents were successfully downloaded");
+    validRuleSassFile=true;    
     }, function(error) {
+        validRuleSassFile=false;
         console.log("Something's wrong in .sass-lint.yml")
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.sass-lint.yml");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\tslint.json', '/opt/sonar-web-frontend-reporters-master/rules/tslint.json').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'\\tslint.json', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/tslint.json').then(function(Contents) {
+         validRuleTsFile=true;
         console.log("The tslint.json File's contents were successfully downloaded");
         processBar_Info.hide();
     }, function(error) {
+        validRuleTsFile=false;
         console.log("Something's wrong in tslint.json")
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>tslint.json");
         processBar_Info.hide();
     });
 });
-setTimeout(function(){if(sshConnectFlag === 0){ processBar_Info.hide();vscode.window.showErrorMessage("SSH Terminal Not Yet Connected Check Username & Password & host Details..");}}, 2000);
+setTimeout(function(){if(sshConnectFlag === 0){ 
+    processBar_Info.hide();
+    vscode.window.showErrorMessage("SSH Terminal Not Yet Connected Check Username & Password & host Details..");
+ }else{ 
+     
+     if(!validRuleCssFile && !validRuleAngularFile && !validRuleJsFile && !validRuleHtmlFile && !validRuleSassFile && !validRuleTsFile && !validRuleEsFile){
+     validRuleFolderFlag=false;
+    }else{vscode.window.showInformationMessage("Rules are succesfully Updated..");}}}, 2000);
+
 }catch(error){
 console.log("updateSonarLintRules :" + error)
+}
 }
 }
 
@@ -136,6 +182,12 @@ this.resetVariable();
 }
 
 generate_Current_File_Report(){
+    console.log("generate_Current_File_Report");
+    
+    returnValue=checkJsonProjectKey(jsonFilePath,configJsonFilename);
+    this.isValidRuleKey();
+    console.log("generate_Current_File_Report" +returnValue);
+    if(returnValue && validRuleFolderFlag){
     try{
 		
 	if (!fs.existsSync(pathToSreporterFileExist)) {
@@ -225,10 +277,13 @@ generate_Current_File_Report(){
     console.log('generate_Current_File_Report: ', error);
     vscode.window.showErrorMessage("generate_Current_File_Report: "+ error);
     }
+    }
 }
 
 writeSreporterConfigFile(sreportersTemplate){
+
 var json = JSON.stringify(sreportersTemplate);
+console.log("pathTo_Sreporter_FileExist");
 fs.writeFile(pathTo_Sreporter_FileExist, json,function (err) {
 	if (err) {
 	return console.log("Error writing file: " + err);
@@ -306,8 +361,18 @@ pushReportCategorywise(severityValue,fileUri,vscodeDiagnostic);
 }
 processBar_Info.hide();
 }
+ 
+isValidRuleKey(){
+if(!validRuleFolderFlag){
+       vscode.window.showErrorMessage("Your Rule Folder Id is Not Valid or Not Given Id Configjsontemplate.json.. Update Server Rule");
+       return;
+    }
+
+}
 
 generate_CssLint_Report(){
+this.isValidRuleKey();
+if(returnValue && validRuleFolderFlag){
  try{
  this.resetVariable();
  processBar_Info.text = ` $(sync) Processing...`;
@@ -321,7 +386,10 @@ generate_CssLint_Report(){
  processBar_Info.hide();
  } 
  }
+ }
 generateJs_ESLint_Report(){
+this.isValidRuleKey();
+if(returnValue && validRuleFolderFlag){
 try{
 this.resetVariable();
 processBar_Info.text = ` $(sync) Processing...`;
@@ -339,8 +407,10 @@ vscode.window.showErrorMessage("generateJs_AngularLint_Report: "+String(error));
 processBar_Info.hide();
 }
 }
+}
 generate_EsAngularlint_Report(){
-
+ this.isValidRuleKey();
+ if(returnValue && validRuleFolderFlag){
  try{
  this.resetVariable();
  processBar_Info.text = ` $(sync) Processing...`;
@@ -353,10 +423,13 @@ generate_EsAngularlint_Report(){
  }catch(error){
  vscode.window.showErrorMessage("generate_EsAngularlint_Report: "+String(error)); 
  processBar_Info.hide();
-} 
+ } 
+ }
 }
 
 generate_HtmlLint_Report(){
+ this.isValidRuleKey();
+ if(returnValue && validRuleFolderFlag){
  try{
  this.resetVariable();
  processBar_Info.text = ` $(sync) Processing...`;
@@ -371,8 +444,11 @@ generate_HtmlLint_Report(){
  processBar_Info.hide();
  } 
  }
+ }
 
 generate_Sass_ScssLint_Report(){
+ this.isValidRuleKey();
+ if(returnValue && validRuleFolderFlag){
  try{
  this.resetVariable(); 
  processBar_Info.text = ` $(sync) Processing...`;
@@ -388,8 +464,11 @@ generate_Sass_ScssLint_Report(){
  processBar_Info.hide();
  } 
  }
+ }
 
 generate_Tslint_Report(){
+ this.isValidRuleKey();
+ if(returnValue && validRuleFolderFlag){
  try{
  this.resetVariable(); 
  processBar_Info.text = ` $(sync) Processing...`;
@@ -403,13 +482,13 @@ generate_Tslint_Report(){
  processBar_Info.hide();
  } 
  }
+ }
 
 
 generateJsonReport() {
 
 try{
-let sreporterPath  = path.resolve(__filename, "./../../../../.sreporterrc");
-const bat = spawn('cmd.exe', ['/c', "sreporter -c "+sreporterPath]);
+const bat = spawn('cmd.exe', ['/c', "sreporter -c "+pathTo_Sreporter_FileExist]);
 bat.stdout.on('data', (data) => {
 console.log(data.toString());
 });
@@ -460,14 +539,28 @@ switch (extType) {
 }
 }
 sreportersFileGenerator(){
+
+returnValue=checkJsonProjectKey(jsonFilePath,configJsonFilename);
+this.isValidRuleKey();
+console.log("returnValue" +jsonFilePath);
+console.log("configJsonFilename" +configJsonFilename);
+if(returnValue && validRuleFolderFlag ){
 try{
 fileExtType="";
 if (!fs.existsSync(pathToSreporterFileExist)) {
 	vscode.window.showErrorMessage('SonarFrontendFilenot exists...');
 	return;
 }
-const configuration = vscode.workspace.getConfiguration("sonarqube-inject");
-lintExcludePaths = configuration.get("lintexclude");
+//const configuration = vscode.workspace.getConfiguration("sonarqube-inject");
+ 
+const cssPath=[rootPath+"\\**\\*.css","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const eslintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const eslintAngularPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const jshintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const htmlHintPath=[rootPath+"\\**\\*.html","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const tslintPath=[rootPath+"\\**\\*.ts","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const sassPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const sassToScsslintPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
 for (var i = 0; i < lintExcludePaths.length; i++) { 
     let excludePath="!"+lintExcludePaths[i];
     cssPath.push(excludePath);
@@ -529,6 +622,7 @@ this.writeSreporterConfigFile(sreporters);
 }catch(error){
 console.log("SreportersFileGenerator: "+error);
 vscode.window.showErrorMessage('SreportersFileGenerator...'+error);
+}
 }
 }
 
@@ -916,5 +1010,21 @@ function pushReportCategorywise(categoryText,fileUri,diagnosticObject){
      sonarBlockerArray.push([fileUri, [diagnosticObject]]);
     }else if(categoryText === "INFO"){
      sonarInfoArray.push([fileUri, [diagnosticObject]]);
+    }
+}
+
+function checkJsonProjectKey(configJsonPath ,configFilename){
+    validRuleFolderName="";
+    lintExcludePaths="";
+    const configJsonData = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
+    console.log("configJsonData.projectkey" +configJsonData.projectkey);
+    let flagValue=0;
+    if(configJsonData.projectkey.length === 0){
+        vscode.window.showInformationMessage("Must Give valid Rule Folder Name " +configFilename);
+        return false ;
+    }else{
+        validRuleFolderName=configJsonData.projectkey;
+        lintExcludePaths=configJsonData.excludepaths;
+        return true;
     }
 }
