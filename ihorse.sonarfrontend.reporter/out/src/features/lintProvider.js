@@ -64,6 +64,7 @@ let sonarInfoArray = [];
 let textDocuments=[];
 let lintReportsArrays=[];
 let fileExtType="";
+let self;
 
 const eslintReport = require(__filename,'./../../../../reports/sonar/eslint.json');
 const jsHintLintReport = require(__filename,'./../../../../../reports/sonar/jshint.json');
@@ -206,14 +207,11 @@ this.resetVariable();
 }
 
 generate_Current_File_Report(){
-    console.log("generate_Current_File_Report");
-    
     returnValue=checkJsonProjectKey(jsonFilePath,configJsonFilename);
     this.isValidRuleKey();
     console.log("generate_Current_File_Report" +returnValue);
     if(returnValue && validRuleFolderFlag){
     try{
-		
 	if (!fs.existsSync(pathToSreporterFileExist)) {
         vscode.window.showErrorMessage('SonarFrontendFilenot exists...');
         return;
@@ -325,7 +323,8 @@ createReportFolder(){
     try {
         this.checkFolderExistOrNot(reportFolderPath);
         this.checkFolderExistOrNot(report_SonarFolderPath); 
-        this.generateJsonReport();      
+        self=this;
+        this.generateJsonReport();     
     }
     catch (error) {
     console.log('createReportFolder: ', error);
@@ -512,14 +511,25 @@ generate_Tslint_Report(){
 generateJsonReport() {
 var exec = require('child_process').exec;
 var child;
-
-child = exec("sreporter -c "+pathTo_Sreporter_FileExist, function (error, stdout, stderr) {
+try{
+  child = exec("sreporter -c "+pathTo_Sreporter_FileExist, function (error, stdout, stderr) {
   console.log("stdout" +stdout.toString());
   console.log("stderr" +stderr.toString());
   if (error !== null) {
     console.log('exec error: ' + error);
+  }else{
+    console.log("Generate Full Lint Reports...");
+    processBar_Info.hide();
+    self.triggerFunctionCall(fileExtType);
   }
 });
+
+console.log("Generate Full Lint Reports1...");
+
+}catch(error){
+console.log("generateJsonReport: "+String(error));
+vscode.window.showErrorMessage("generateJsonReport: "+String(error));
+}
 }
 
 triggerFunctionCall(extType){
