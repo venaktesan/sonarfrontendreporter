@@ -29,14 +29,14 @@ const pathToSreporterFileExist = path.join(__filename, "./../../../../bin/srepor
 const pathTo_Sreporter_FileExist = path.join(rootPath+"/.sreporterrc");
 
 
-const cssPath=[rootPath+"\\**\\*.css","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const eslintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const eslintAngularPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const jshintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const htmlHintPath=[rootPath+"\\**\\*.html","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const tslintPath=[rootPath+"\\**\\*.ts","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const sassPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const sassToScsslintPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+const cssPath=[rootPath+"/**/*.css","!"+rootPath+"/bower_components/**","!"+rootPath+"/node_modules/**","!"+rootPath+"/report/**","!"+rootPath+"/rules/**","!"+rootPath+"/.sreporterrc"];
+const eslintPath=[rootPath+"/**/*.js","!"+rootPath+"/bower_components/**","!"+rootPath+"/node_modules/**","!"+rootPath+"/report/**","!"+rootPath+"/rules/**","!"+rootPath+"/.sreporterrc"];
+const eslintAngularPath=[rootPath+"/**/*.js","!"+rootPath+"/bower_components/**","!"+rootPath+"/node_modules/**","!"+rootPath+"/report/**","!"+rootPath+"/rules/**","!"+rootPath+"/.sreporterrc"];
+const jshintPath=[rootPath+"/**/*.js","!"+rootPath+"/bower_components/**","!"+rootPath+"/node_modules/**","!"+rootPath+"/report/**","!"+rootPath+"/rules/**","!"+rootPath+"/.sreporterrc"];
+const htmlHintPath=[rootPath+"/**/*.html","!"+rootPath+"/bower_components/**","!"+rootPath+"/node_modules/**","!"+rootPath+"/report/**","!"+rootPath+"/rules/**","!"+rootPath+"/.sreporterrc"];
+const tslintPath=[rootPath+"/**/*.ts","!"+rootPath+"/bower_components/**","!"+rootPath+"/node_modules/**","!"+rootPath+"/report/**","!"+rootPath+"/rules/**","!"+rootPath+"/.sreporterrc"];
+const sassPath=[rootPath+"/**/*.s+(a|c)ss","!"+rootPath+"/bower_components/**","!"+rootPath+"/node_modules/**","!"+rootPath+"/report/**","!"+rootPath+"/rules/**","!"+rootPath+"/.sreporterrc"];
+const sassToScsslintPath=[rootPath+"/**/*.s+(a|c)ss","!"+rootPath+"/bower_components/**","!"+rootPath+"/node_modules/**","!"+rootPath+"/report/**","!"+rootPath+"/rules/**","!"+rootPath+"/.sreporterrc"];
 
 let lintExcludePaths = [];
 let info_Count=0;
@@ -94,10 +94,34 @@ updateSonarLintRules(){
     username: 'johnsonp',
     password: 'Welcome321'  
     }).then(function() {
+    
+    if(fs.exists(pathTo_RulesOverWritePath)){
+        var rmdir = function(pathTo_RulesOverWritePath) {
+        console.log("haid daa..");
+        var list = fs.readdirSync(pathTo_RulesOverWritePath);
+        for(var i = 0; i < list.length; i++) {
+            var filename = path.join(pathTo_RulesOverWritePath, list[i]);
+            var stat = fs.statSync(filename);
+
+            if(filename == "." || filename == "..") {
+                // pass these files
+            } else if(stat.isDirectory()) {
+                // rmdir recursively
+                rmdir(filename);
+            } else {
+                // rm fiilename
+                fs.unlinkSync(filename);
+            }
+        }
+    fs.rmdirSync(pathTo_RulesOverWritePath);
+    fs.mkdirSync(pathTo_RulesOverWritePath); 
+    }
+    }
+    
     sshConnectFlag=1;
     // Local, Remote 
     validRuleFolderFlag=true;
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.csslintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.csslintrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'/.csslintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.csslintrc').then(function(Contents) {
         console.log("The .csslintrc File's contents were successfully downloaded");
         validRuleCssFile=true;
     }, function(error) {
@@ -106,7 +130,7 @@ updateSonarLintRules(){
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.csslintrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.eslintangularrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.eslintangularrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'/.eslintangularrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.eslintangularrc').then(function(Contents) {
         console.log("The .eslintangularrc File's contents were successfully downloaded");
         validRuleAngularFile=true;
     }, function(error) {
@@ -115,7 +139,7 @@ updateSonarLintRules(){
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.eslintangularrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.eslintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.eslintrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'/.eslintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.eslintrc').then(function(Contents) {
         validRuleEsFile=true;
         console.log("The .eslintrc File's contents were successfully downloaded");
     }, function(error) {
@@ -124,7 +148,7 @@ updateSonarLintRules(){
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.eslintrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.htmlhintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.htmlhintrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'/.htmlhintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.htmlhintrc').then(function(Contents) {
         validRuleHtmlFile=true;
         console.log("The .htmlhintrc File's contents were successfully downloaded");
     }, function(error) {
@@ -133,7 +157,7 @@ updateSonarLintRules(){
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.htmlhintrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.jshintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.jshintrc').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'/.jshintrc', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.jshintrc').then(function(Contents) {
         console.log("The .jshintrc File's contents were successfully downloaded");
         validRuleJsFile=true;
     }, function(error) {
@@ -142,7 +166,7 @@ updateSonarLintRules(){
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.jshintrc");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\.sass-lint.yml', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.sass-lint.yml').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'/.sass-lint.yml', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/.sass-lint.yml').then(function(Contents) {
         console.log("The .sass-lint.yml File's contents were successfully downloaded");
     validRuleSassFile=true;    
     }, function(error) {
@@ -151,7 +175,7 @@ updateSonarLintRules(){
         vscode.window.showErrorMessage("Something's wrong in updateSonarLintRules =>.sass-lint.yml");
     }),
   
-    ssh.getFile(pathTo_RulesOverWritePath+'\\tslint.json', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/tslint.json').then(function(Contents) {
+    ssh.getFile(pathTo_RulesOverWritePath+'/tslint.json', '/opt/sonar-web-frontend-reporters-master/rules/'+validRuleFolderName+'/tslint.json').then(function(Contents) {
          validRuleTsFile=true;
         console.log("The tslint.json File's contents were successfully downloaded");
         processBar_Info.hide();
@@ -217,51 +241,51 @@ generate_Current_File_Report(){
         sreporters = { 
         "projectName" : "SonarWebReporter",
         "csslint" : { 
-        "src"  : rootPath+"\\"+filePath ,
-        "report"  : rootReportPath+"\\reports\\sonar\\csslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.csslintrc"}
+        "src"  : rootPath+"/"+filePath ,
+        "report"  : rootReportPath+"/reports/sonar/csslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.csslintrc"}
         }
     }else if(fileExtType === 'js'){
         sreporters = { 
         "projectName" : "SonarWebReporter",
         "eslint" : { 
-        "src"  :  rootPath+"\\"+filePath,
-        "report"  : rootReportPath+"\\reports\\sonar\\eslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.eslintrc"},
+        "src"  :  rootPath+"/"+filePath,
+        "report"  : rootReportPath+"/reports/sonar/eslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.eslintrc"},
 
         "jshint" : { 
-        "src"  :  rootPath+"\\"+filePath,
-        "report"  : rootReportPath+"\\reports\\sonar\\jshint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.jshintrc"},
+        "src"  :  rootPath+"/"+filePath,
+        "report"  : rootReportPath+"/reports/sonar/jshint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.jshintrc"},
 
         "eslintangular" : { 
-        "src"  : rootPath+"\\"+filePath,
-        "report"  : rootReportPath+"\\reports\\sonar\\eslint-angular.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.eslintangularrc"}
+        "src"  : rootPath+"/"+filePath,
+        "report"  : rootReportPath+"/reports/sonar/eslint-angular.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.eslintangularrc"}
         }
     }else if(fileExtType === 'html'){
         sreporters = { 
         "projectName" : "SonarWebReporter",
         "htmlhint" : { 
-        "src"  :  rootPath+"\\"+filePath,
-        "report"  : rootReportPath+"\\reports\\sonar\\htmlhint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.htmlhintrc"}
+        "src"  :  rootPath+"/"+filePath,
+        "report"  : rootReportPath+"/reports/sonar/htmlhint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.htmlhintrc"}
         }  
     }else if(fileExtType === 'ts'){
         sreporters = { 
         "projectName" : "SonarWebReporter",
         "tslint" : { 
-        "src"  : rootPath+"\\"+filePath,
-        "report"  : rootReportPath+"\\reports\\sonar\\tslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\tslint.json"}
+        "src"  : rootPath+"/"+filePath,
+        "report"  : rootReportPath+"/reports/sonar/tslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/tslint.json"}
         }
     }else if(fileExtType === 'sass' || fileExtType === 'scss'){
         sreporters = { 
         "projectName" : "SonarWebReporter",
         "sasslint" : { 
-        "src"  : rootPath+"\\"+filePath,
-        "report"  : rootReportPath+"\\reports\\sonar\\sasslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.sass-lint.yml"}
+        "src"  : rootPath+"/"+filePath,
+        "report"  : rootReportPath+"/reports/sonar/sasslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.sass-lint.yml"}
         }
     }
     if(sreporters === ""){
@@ -377,7 +401,7 @@ if(returnValue && validRuleFolderFlag){
  this.resetVariable();
  processBar_Info.text = ` $(sync) Processing...`;
  processBar_Info.show();
- const cssLintReport = JSON.parse(fs.readFileSync(rootReportPath+"\\reports\\sonar\\csslint.json", 'utf8'));  
+ const cssLintReport = JSON.parse(fs.readFileSync(rootReportPath+"/reports/sonar/csslint.json", 'utf8'));  
  textDocuments=null;
  lintReportsArrays.push(cssLintReport);
  this.lintReportIterater(lintReportsArrays);
@@ -394,8 +418,8 @@ try{
 this.resetVariable();
 processBar_Info.text = ` $(sync) Processing...`;
 processBar_Info.show();
-const eslintLintReport = JSON.parse(fs.readFileSync(rootReportPath+"\\reports\\sonar\\eslint.json", 'utf8'));
-const jsHintLintReport = JSON.parse(fs.readFileSync(rootReportPath+"\\reports\\sonar\\jshint.json", 'utf8'));
+const eslintLintReport = JSON.parse(fs.readFileSync(rootReportPath+"/reports/sonar/eslint.json", 'utf8'));
+const jsHintLintReport = JSON.parse(fs.readFileSync(rootReportPath+"/reports/sonar/jshint.json", 'utf8'));
 
 textDocuments=null;
 lintReportsArrays.push(eslintLintReport);
@@ -415,7 +439,7 @@ generate_EsAngularlint_Report(){
  this.resetVariable();
  processBar_Info.text = ` $(sync) Processing...`;
  processBar_Info.show();
- const esAngularLintReport = JSON.parse(fs.readFileSync(rootReportPath+"\\reports\\sonar\\eslint-angular.json", 'utf8'));  
+ const esAngularLintReport = JSON.parse(fs.readFileSync(rootReportPath+"/reports/sonar/eslint-angular.json", 'utf8'));  
  textDocuments=null;
  lintReportsArrays.push(esAngularLintReport);
  this.lintReportIterater(lintReportsArrays);
@@ -434,7 +458,7 @@ generate_HtmlLint_Report(){
  this.resetVariable();
  processBar_Info.text = ` $(sync) Processing...`;
  processBar_Info.show();
- const htmlLintReport = JSON.parse(fs.readFileSync(rootReportPath+"\\reports\\sonar\\htmlhint.json", 'utf8'));  
+ const htmlLintReport = JSON.parse(fs.readFileSync(rootReportPath+"/reports/sonar/htmlhint.json", 'utf8'));  
  textDocuments=null;
  lintReportsArrays.push(htmlLintReport);
  this.lintReportIterater(lintReportsArrays);
@@ -453,7 +477,7 @@ generate_Sass_ScssLint_Report(){
  this.resetVariable(); 
  processBar_Info.text = ` $(sync) Processing...`;
  processBar_Info.show();
- const sass_ScssLintReport = JSON.parse(fs.readFileSync(rootReportPath+"\\reports\\sonar\\sasslint.json", 'utf8'));  
+ const sass_ScssLintReport = JSON.parse(fs.readFileSync(rootReportPath+"/reports/sonar/sasslint.json", 'utf8'));  
  textDocuments=null;
  lintReportsArrays.push(sass_ScssLintReport);
  this.lintReportIterater(lintReportsArrays);
@@ -473,7 +497,7 @@ generate_Tslint_Report(){
  this.resetVariable(); 
  processBar_Info.text = ` $(sync) Processing...`;
  processBar_Info.show();
- const tsLintReport = JSON.parse(fs.readFileSync(rootReportPath+"\\reports\\sonar\\tslint.json", 'utf8'));  
+ const tsLintReport = JSON.parse(fs.readFileSync(rootReportPath+"/reports/sonar/tslint.json", 'utf8'));  
  textDocuments=null;
  lintReportsArrays.push(tsLintReport);
  this.lintReportIterater(lintReportsArrays);
@@ -486,34 +510,16 @@ generate_Tslint_Report(){
 
 
 generateJsonReport() {
+var exec = require('child_process').exec;
+var child;
 
-try{
-const bat = spawn('cmd.exe', ['/c', "sreporter -c "+pathTo_Sreporter_FileExist]);
-bat.stdout.on('data', (data) => {
-console.log(data.toString());
+child = exec("sreporter -c "+pathTo_Sreporter_FileExist, function (error, stdout, stderr) {
+  console.log("stdout" +stdout.toString());
+  console.log("stderr" +stderr.toString());
+  if (error !== null) {
+    console.log('exec error: ' + error);
+  }
 });
-
-bat.stderr.on('data', (data) => {
-console.log(data.toString());
-});
-
-bat.on('exit', (code) => {
-console.log(`Child exited with code ${code}`);
-if(code == 1){
-processBar_Info.hide();
-vscode.window.showErrorMessage("Invalid Character Peresent in Scanning Project or Files.");
-}else{
-//vscode.window.showInformationMessage("Generate Full Lint Reports...");  
-console.log("Generate Full Lint Reports...");
-processBar_Info.hide();
-this.triggerFunctionCall(fileExtType);
-}
-}); 
-
-}catch(error){
-console.log("generateJsonReport: "+String(error));
-vscode.window.showErrorMessage("generateJsonReport: "+String(error));
-}
 }
 
 triggerFunctionCall(extType){
@@ -551,16 +557,7 @@ if (!fs.existsSync(pathToSreporterFileExist)) {
 	vscode.window.showErrorMessage('SonarFrontendFilenot exists...');
 	return;
 }
-//const configuration = vscode.workspace.getConfiguration("sonarqube-inject");
- 
-const cssPath=[rootPath+"\\**\\*.css","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const eslintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const eslintAngularPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const jshintPath=[rootPath+"\\**\\*.js","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const htmlHintPath=[rootPath+"\\**\\*.html","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const tslintPath=[rootPath+"\\**\\*.ts","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const sassPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
-const sassToScsslintPath=[rootPath+"\\**\\*.s+(a|c)ss","!"+rootPath+"\\bower_components\\**","!"+rootPath+"\\node_modules\\**","!"+rootPath+"\\report\\**","!"+rootPath+"\\rules\\**","!"+rootPath+"\\.sreporterrc"];
+
 for (var i = 0; i < lintExcludePaths.length; i++) { 
     let excludePath="!"+lintExcludePaths[i];
     cssPath.push(excludePath);
@@ -577,43 +574,43 @@ var sreporters = {
         "projectName" : "SonarWebReporter",
         "csslint" : { 
         "src"  : cssPath,
-        "report"  : rootReportPath+"\\reports\\sonar\\csslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.csslintrc"},  
+        "report"  : rootReportPath+"/reports/sonar/csslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.csslintrc"},  
 
         "eslint" : { 
         "src"  : eslintPath,
-        "report"  : rootReportPath+"\\reports\\sonar\\eslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.eslintrc"},
+        "report"  : rootReportPath+"/reports/sonar/eslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.eslintrc"},
 
         "eslintangular" : { 
         "src"  : eslintAngularPath,
-        "report"  : rootReportPath+"\\reports\\sonar\\eslint-angular.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.eslintangularrc"},
+        "report"  : rootReportPath+"/reports/sonar/eslint-angular.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.eslintangularrc"},
 
         "jshint" : { 
         "src"  : jshintPath,
-        "report"  : rootReportPath+"\\reports\\sonar\\jshint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.jshintrc"},
+        "report"  : rootReportPath+"/reports/sonar/jshint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.jshintrc"},
 
         "htmlhint" : { 
         "src"  : htmlHintPath,
-        "report"  : rootReportPath+"\\reports\\sonar\\htmlhint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.htmlhintrc"},
+        "report"  : rootReportPath+"/reports/sonar/htmlhint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.htmlhintrc"},
 
         "tslint" : { 
         "src"  : tslintPath,
-        "report"  : rootReportPath+"\\reports\\sonar\\tslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\tslint.json"},
+        "report"  : rootReportPath+"/reports/sonar/tslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/tslint.json"},
 
         "sasslint" : { 
         "src"  : sassPath,
-        "report"  : rootReportPath+"\\reports\\sonar\\sasslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.sass-lint.yml"},
+        "report"  : rootReportPath+"/reports/sonar/sasslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.sass-lint.yml"},
 
         "sass-to-scsslint" : { 
         "src"  : sassToScsslintPath,
-        "report"  : rootReportPath+"\\reports\\sonar\\sass-to-scsslint.json",
-        "rulesFile"  : pathTo_RulesOverWritePath+"\\.sass-lint.yml"}
+        "report"  : rootReportPath+"/reports/sonar/sass-to-scsslint.json",
+        "rulesFile"  : pathTo_RulesOverWritePath+"/.sass-lint.yml"}
     }
 this.resetVariable();
 processBar_Info.text = ` $(sync) Processing...`;
