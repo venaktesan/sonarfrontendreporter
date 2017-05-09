@@ -147,7 +147,7 @@
 	{
         "command": "sonarqube-inject.clear-all-rule-errors",
         "key": "ctrl+f2",
-        "mac": "cmd+f2",
+        "mac": "cmd+f6",
         "when": ""
     }
 	],

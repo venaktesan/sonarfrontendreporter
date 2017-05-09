@@ -5,19 +5,23 @@ Sonar Web Frontend Reporter support for Visual Studio Code that provides on-the-
 ## Important
 1. https://github.com/venaktesan/sonarfrontendreporter  Source download from this git url.
 
-2. After paste the download plugin inside this location ->C:\Users\xxx\.vscode\extensions\
+2. After paste the download plugin inside this location 
+   -> Windows %USERPROFILE%\.vscode\extensions
+   -> Mac ~/.vscode/extensions
+   -> Linux ~/.vscode/extensions
 
-3. Open cmd prompt go to this location ->C:\Users\xxx\.vscode\extensions\ihorse.sonarfrontend.reporter.
+3. Open cmd prompt go to this location 
+   Windows ->C:\Users\xxx\.vscode\extensions\ihorse.sonarfrontend.reporter
+   Mac -> ~/.vscode/extensions/ihorse.sonarfrontend.reporter
 
 4. Run this commands(admin) one by one npm install and npm install sonar-web-frontend-reporters -g .
 
-Note: Each time you open the editor you must first update the server rule or Analysis the project otherwise extension not scan the files.
+5. Reopen the vscode editor.
 
 ## Extension settings
-
 1. open configJsonTemplate.json file.
 2. You must give the Projectkey(give your project profile rule folder name what in server. )
-3. excludepaths : give the excluded file and folder ,Drive char must be small letter eg: c:,d:.
+3. excludepaths : give the excluded file and folder ,Drive char must be small letter eg: c:,d: for windows.
 
 ## Extension Options
 
@@ -44,7 +48,8 @@ This option are seen after open a file,then click this (...) icon right-side top
 
 9. Analyse Current File (ctrl+f1 for windows) (cmd+f1 for mac) -> this option analysis current file and show the result depends on the file type (js,css...). 
 
-10. Clear Lint Errors (ctrl+f2 for windows) (cmd+f2 for mac) -> this option clear the error in problem tab.
+10. Clear Lint Errors (ctrl+f2 for windows) (cmd+f6 for mac) -> this option clear the error in problem tab.
+
 
 
 
