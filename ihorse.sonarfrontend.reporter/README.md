@@ -46,7 +46,6 @@ This option are seen after open a file,then click this (...) icon right-side top
 
 10. Clear Lint Errors (ctrl+f2 for windows) (cmd+f2 for mac) -> this option clear the error in problem tab.
 
-## Configuration File
 
 
 
