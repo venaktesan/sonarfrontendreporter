@@ -9,17 +9,15 @@ Sonar Web Frontend Reporter support for Visual Studio Code that provides on-the-
 
 3. Open cmd prompt go to this location ->C:\Users\xxx\.vscode\extensions\ihorse.sonarfrontend.reporter.
 
-4. Run this commands one by one npm install and npm install sonar-web-frontend-reporters -g .
+4. Run this commands(admin) one by one npm install and npm install sonar-web-frontend-reporters -g .
 
+Note: Each time you open the editor you must first update the server rule or Analysis the project otherwise extension not scan the files.
 
 ## Extension settings
-* Go to this extension location -> C:\Users\xxx\.vscode\extensions\ihorse.sonarfrontend.reporter.
-* Open package.json file.
 
-* `sonarqube-inject.lintexclude`  
-Only exclude files paths only,Drive letter must be small eg: c:,d: etc.  
-Type: String  
-Default value: `[c:\Users\XXX\Desktop\app\assert\vendor\**","c:\Users\XXX\Desktop\app\assert\vendor\**]`.
+1. open configJsonTemplate.json file.
+2. You must give the Projectkey(give your project profile rule folder name what in server. )
+3. excludepaths : give the excluded file and folder ,Drive char must be small letter eg: c:,d:.
 
 ## Extension Options
 
@@ -44,11 +42,11 @@ Every day you must once update the rules.
 
 This option are seen after open a file,then click this (...) icon right-side top corner.
 
-9. Analyse Current File -> this option analysis current file and show the result depends on the file type (js,css...). 
+9. Analyse Current File (ctrl+f1 for windows) (cmd+f1 for mac) -> this option analysis current file and show the result depends on the file type (js,css...). 
 
-10. Clear Lint Errors -> this option clear the error in problem tab.
+10. Clear Lint Errors (ctrl+f2 for windows) (cmd+f2 for mac) -> this option clear the error in problem tab.
 
-
+## Configuration File
 
 
 
